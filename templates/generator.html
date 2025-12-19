@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ doc_type|title }} Generator - Legal Document Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .section-card { transition: all 0.3s ease; }
+        .section-card:hover { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); }
+        .toggle-checkbox:checked { right: 0; border-color: #667eea; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #667eea; }
+        .preview-content { max-height: 600px; overflow-y: auto; }
+        .preview-content h1 { font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; }
+        .preview-content h2 { font-size: 1.25rem; font-weight: bold; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+        .preview-content h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .preview-content p { margin-bottom: 0.75rem; }
+        .preview-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+        .preview-content li { margin-bottom: 0.25rem; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-8">
+        <div class="container mx-auto px-4">
+            <a href="/" class="text-white/80 hover:text-white mb-2 inline-block">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Home
+            </a>
+            <h1 class="text-3xl font-bold">
+                {% if doc_type == "privacy" %}Privacy Policy Generator
+                {% elif doc_type == "tos" %}Terms of Service Generator
+                {% elif doc_type == "cookie" %}Cookie Policy Generator
+                {% elif doc_type == "eula" %}EULA Generator
+                {% elif doc_type == "refund" %}Refund Policy Generator
+                {% else %}Complete Legal Package Generator
+                {% endif %}
+            </h1>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <form id="generatorForm" class="space-y-8">
+            <input type="hidden" name="session_id" value="{{ session_id }}">
+
+            <!-- Business Information - Always shown -->
+            <div class="section-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-building mr-3 text-blue-600"></i>
+                    Business Information
+                </h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Company/Business Name *</label>
+                        <input type="text" name="company_name" value="{{ config.company_name }}" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Acme Inc.">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Platform Type</label>
+                        <select name="platform_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="website" {% if config.platform_type == "website" %}selected{% endif %}>Website</option>
+                            <option value="app" {% if config.platform_type == "app" %}selected{% endif %}>Mobile App</option>
+                            <option value="both" {% if config.platform_type == "both" %}selected{% endif %}>Both Website & App</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Website URL</label>
+                        <input type="url" name="website_url" value="{{ config.website_url }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="https://example.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Website Name</label>
+                        <input type="text" name="website_name" value="{{ config.website_name }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="Example.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">App Name (if applicable)</label>
+                        <input type="text" name="app_name" value="{{ config.app_name }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="My App">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                        <input type="text" name="country" value="{{ config.country }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="United States">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Company Address</label>
+                        <input type="text" name="company_address" value="{{ config.company_address }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="123 Main St, City, State, ZIP">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Contact Email *</label>
+                        <input type="email" name="contact_email" value="{{ config.contact_email }}" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="legal@example.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Contact Phone</label>
+                        <input type="tel" name="contact_phone" value="{{ config.contact_phone }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="+1 (555) 123-4567">
+                    </div>
+                </div>
+            </div>
+
+            {% if doc_type in ["privacy", "all"] %}
+            <!-- Data Collection -->
+            <div class="section-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-database mr-3 text-green-600"></i>
+                    Data Collection
+                </h2>
+                <p class="text-gray-600 mb-4">What personal information do you collect from users?</p>
+                <div class="grid md:grid-cols-3 gap-4">
+                    {% for field, label in [
+                        ("collects_name", "Name"),
+                        ("collects_email", "Email Address"),
+                        ("collects_phone", "Phone Number"),
+                        ("collects_address", "Physical Address"),
+                        ("collects_billing_address", "Billing Address"),
+                        ("collects_payment_info", "Payment Information"),
+                        ("collects_age", "Age/Date of Birth"),
+                        ("collects_username", "Username"),
+                        ("collects_password", "Password")
+                    ] %}
+                    <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="{{ field }}" {% if config[field] %}checked{% endif %}
+                            class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                        <span class="text-gray-700">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Tracking Technologies -->
+            <div class="section-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-chart-line mr-3 text-yellow-600"></i>
+                    Tracking & Analytics
+                </h2>
+                <div class="grid md:grid-cols-3 gap-4 mb-6">
+                    {% for field, label in [
+                        ("uses_cookies", "Cookies"),
+                        ("uses_sessions", "Session Data"),
+                        ("uses_local_storage", "Local Storage"),
+                        ("uses_web_beacons", "Web Beacons/Pixels"),
+                        ("uses_google_maps", "Google Maps"),
+                        ("uses_analytics", "Analytics Tools")
+                    ] %}
+                    <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="{{ field }}" {% if config[field] %}checked{% endif %}
+                            class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                        <span class="text-gray-700">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Analytics Provider</label>
+                    <input type="text" name="analytics_provider" value="{{ config.analytics_provider }}"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Google Analytics, Mixpanel, etc.">
+                </div>
+            </div>
+
+            <!-- Social Logins -->
+            <div class="section-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-users mr-3 text-purple-600"></i>
+                    Social Media Integration
+                </h2>
+                <p class="text-gray-600 mb-4">Do you offer social media login options?</p>
+                <div class="grid md:grid-cols-5 gap-4">
+                    {% for field, label, icon in [
+                        ("social_login_facebook", "Facebook", "fa-facebook"),
+                        ("social_login_google", "Google", "fa-google"),
+                        ("social_login_twitter", "Twitter/X", "fa-twitter"),
+                        ("social_login_github", "GitHub", "fa-github"),
+                        ("social_login_linkedin", "LinkedIn", "fa-linkedin")
+                    ] %}
+                    <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="{{ field }}" {% if config[field] %}checked{% endif %}
+                            class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                        <i class="fab {{ icon }} text-gray-600"></i>
+                        <span class="text-gray-700">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Marketing -->
+            <div class="section-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-bullhorn mr-3 text-red-600"></i>
+                    Marketing & Advertising
+                </h2>
+                <div class="grid md:grid-cols-3 gap-4">
+                    {% for field, label in [
+                        ("has_email_newsletter", "Email Newsletter"),
+                        ("displays_ads", "Display Ads"),
+                        ("uses_facebook_pixel", "Facebook Pixel"),
+                        ("uses_retargeting", "Retargeting/Remarketing")
+                    ] %}
+                    <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="{{ field }}" {% if config[field] %}checked{% endif %}
+                            class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                        <span class="text-gray-700">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- App Permissions (show if platform is app or both) -->
+            <div class="section-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-mobile-alt mr-3 text-indigo-600"></i>
+                    Mobile App Permissions
+                </h2>
+                <p class="text-gray-600 mb-4">What device permissions does your app request?</p>
+                <div class="grid md:grid-cols-3 gap-4">
+                    {% for field, label in [
+                        ("requests_geolocation", "Location/GPS"),
+                        ("requests_contacts", "Contacts"),
+                        ("requests_camera", "Camera"),
+                        ("requests_photo_gallery", "Photo Gallery"),
+                        ("requests_microphone", "Microphone"),
+                        ("requests_push_notifications", "Push Notifications")
+                    ] %}
+                    <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="{{ field }}" {% if config[field] %}checked{% endif %}
+                            class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                        <span class="text-gray-700">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Payments -->
+            <div class="section-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-credit-card mr-3 text-green-600"></i>
+                    Payment Processing
+                </h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="accepts_payments" {% if config.accepts_payments %}checked{% endif %}
+                            class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                        <span class="text-gray-700">Accept Payments</span>
+                    </label>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Payment Type</label>
+                        <select name="payment_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="one_time" {% if config.payment_type == "one_time" %}selected{% endif %}>One-time</option>
+                            <option value="recurring" {% if config.payment_type == "recurring" %}selected{% endif %}>Recurring/Subscription</option>
+                            <option value="both" {% if config.payment_type == "both" %}selected{% endif %}>Both</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compliance -->
+            <div class="section-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-balance-scale mr-3 text-blue-600"></i>
+                    Regulatory Compliance
+                </h2>
+                <div class="grid md:grid-cols-3 gap-4">
+                    {% for field, label, desc in [
+                        ("gdpr_compliant", "GDPR", "European Union"),
+                        ("ccpa_compliant", "CCPA", "California"),
+                        ("caloppa_compliant", "CalOPPA", "California"),
+                        ("coppa_compliant", "COPPA", "Children's Privacy")
+                    ] %}
+                    <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="{{ field }}" {% if config[field] %}checked{% endif %}
+                            class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                        <div>
+                            <span class="text-gray-700 font-medium">{{ label }}</span>
+                            <span class="text-gray-500 text-sm block">{{ desc }}</span>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Data Sharing -->
+            <div class="section-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-share-alt mr-3 text-orange-600"></i>
+                    Data Sharing & Security
+                </h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                            <input type="checkbox" name="shares_with_third_parties" {% if config.shares_with_third_parties %}checked{% endif %}
+                                class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                            <span class="text-gray-700">Share Data with Third Parties</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-3 bg-red-50 rounded-lg hover:bg-red-100 cursor-pointer">
+                            <input type="checkbox" name="sells_data" {% if config.sells_data %}checked{% endif %}
+                                class="w-5 h-5 text-red-600 rounded focus:ring-red-500">
+                            <span class="text-red-700">Sell User Data</span>
+                        </label>
+                    </div>
+                    <div class="space-y-4">
+                        <label class="flex items-center space-x-3 p-3 bg-green-50 rounded-lg hover:bg-green-100 cursor-pointer">
+                            <input type="checkbox" name="uses_encryption" {% if config.uses_encryption %}checked{% endif %}
+                                class="w-5 h-5 text-green-600 rounded focus:ring-green-500">
+                            <span class="text-green-700">Use Encryption</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-3 bg-green-50 rounded-lg hover:bg-green-100 cursor-pointer">
+                            <input type="checkbox" name="uses_ssl" {% if config.uses_ssl %}checked{% endif %}
+                                class="w-5 h-5 text-green-600 rounded focus:ring-green-500">
+                            <span class="text-green-700">SSL/TLS Encryption</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Data Retention Period</label>
+                    <input type="text" name="data_retention_period" value="{{ config.data_retention_period }}"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="e.g., 2 years, until account deletion">
+                </div>
+            </div>
+
+            <!-- User Rights -->
+            <div class="section-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-user-shield mr-3 text-teal-600"></i>
+                    User Rights
+                </h2>
+                <div class="grid md:grid-cols-2 gap-4">
+                    {% for field, label in [
+                        ("allows_data_access", "Right to Access Data"),
+                        ("allows_data_deletion", "Right to Delete Data"),
+                        ("allows_data_portability", "Right to Data Portability"),
+                        ("allows_opt_out", "Right to Opt Out")
+                    ] %}
+                    <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="{{ field }}" {% if config[field] %}checked{% endif %}
+                            class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                        <span class="text-gray-700">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if doc_type in ["tos", "all"] %}
+            <!-- Terms of Service Specific -->
+            <div class="section-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-file-contract mr-3 text-green-600"></i>
+                    Terms of Service Settings
+                </h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Service Description</label>
+                        <textarea name="service_description" rows="3"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="Brief description of your service...">{{ config.service_description }}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Age</label>
+                        <input type="number" name="minimum_age" value="{{ config.minimum_age }}" min="0" max="99"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Jurisdiction</label>
+                        <input type="text" name="jurisdiction" value="{{ config.jurisdiction }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g., State of California">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Governing State</label>
+                        <input type="text" name="governing_state" value="{{ config.governing_state }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g., Delaware">
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-3 gap-4 mt-6">
+                    {% for field, label in [
+                        ("requires_account", "Requires Account"),
+                        ("has_paid_services", "Has Paid Services"),
+                        ("has_subscriptions", "Has Subscriptions"),
+                        ("has_free_trial", "Offers Free Trial"),
+                        ("offers_refunds", "Offers Refunds"),
+                        ("allows_user_content", "Allows User Content"),
+                        ("moderates_content", "Moderates Content"),
+                        ("has_third_party_links", "Has Third-Party Links"),
+                        ("provides_api", "Provides API"),
+                        ("has_mobile_app", "Has Mobile App"),
+                        ("has_arbitration", "Requires Arbitration"),
+                        ("disclaims_warranties", "Disclaims Warranties")
+                    ] %}
+                    <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="{{ field }}" {% if config[field] %}checked{% endif %}
+                            class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                        <span class="text-gray-700">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if doc_type in ["cookie", "all"] %}
+            <!-- Cookie Policy Specific -->
+            <div class="section-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-cookie-bite mr-3 text-yellow-600"></i>
+                    Cookie Policy Settings
+                </h2>
+                <p class="text-gray-600 mb-4">What types of cookies do you use?</p>
+                <div class="grid md:grid-cols-3 gap-4 mb-6">
+                    {% for field, label in [
+                        ("uses_essential_cookies", "Essential Cookies"),
+                        ("uses_functional_cookies", "Functional Cookies"),
+                        ("uses_performance_cookies", "Performance Cookies"),
+                        ("uses_advertising_cookies", "Advertising Cookies"),
+                        ("uses_social_cookies", "Social Media Cookies"),
+                        ("has_cookie_consent", "Cookie Consent Banner"),
+                        ("honors_dnt", "Honor Do Not Track")
+                    ] %}
+                    <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="{{ field }}" {% if config[field] %}checked{% endif %}
+                            class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                        <span class="text-gray-700">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Analytics & Marketing Cookies</h3>
+                <div class="grid md:grid-cols-4 gap-4">
+                    {% for field, label in [
+                        ("uses_google_analytics", "Google Analytics"),
+                        ("uses_hotjar", "Hotjar"),
+                        ("uses_mixpanel", "Mixpanel"),
+                        ("uses_google_ads", "Google Ads"),
+                        ("uses_linkedin_insight", "LinkedIn Insight"),
+                        ("uses_twitter_pixel", "Twitter Pixel"),
+                        ("uses_tiktok_pixel", "TikTok Pixel"),
+                        ("uses_hubspot", "HubSpot"),
+                        ("uses_intercom", "Intercom")
+                    ] %}
+                    <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="{{ field }}" {% if config[field] %}checked{% endif %}
+                            class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                        <span class="text-gray-700">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if doc_type in ["eula", "all"] %}
+            <!-- EULA Specific -->
+            <div class="section-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-key mr-3 text-purple-600"></i>
+                    EULA Settings
+                </h2>
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">License Type</label>
+                        <select name="license_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="perpetual" {% if config.license_type == "perpetual" %}selected{% endif %}>Perpetual</option>
+                            <option value="subscription" {% if config.license_type == "subscription" %}selected{% endif %}>Subscription</option>
+                            <option value="freemium" {% if config.license_type == "freemium" %}selected{% endif %}>Freemium</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Billing Cycle</label>
+                        <select name="billing_cycle" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="monthly" {% if config.billing_cycle == "monthly" %}selected{% endif %}>Monthly</option>
+                            <option value="yearly" {% if config.billing_cycle == "yearly" %}selected{% endif %}>Yearly</option>
+                            <option value="one-time" {% if config.billing_cycle == "one-time" %}selected{% endif %}>One-time</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Trial Period</label>
+                        <input type="text" name="trial_period" value="{{ config.trial_period }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g., 14 days">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Warranty Period</label>
+                        <input type="text" name="warranty_period" value="{{ config.warranty_period }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g., 90 days">
+                    </div>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">License Restrictions</h3>
+                <div class="grid md:grid-cols-3 gap-4">
+                    {% for field, label in [
+                        ("is_subscription", "Is Subscription"),
+                        ("auto_renewal", "Auto-Renewal"),
+                        ("is_transferable", "License Transferable"),
+                        ("no_reverse_engineering", "No Reverse Engineering"),
+                        ("no_modification", "No Modification"),
+                        ("no_redistribution", "No Redistribution"),
+                        ("no_commercial_use", "No Commercial Use"),
+                        ("has_warranty", "Has Warranty"),
+                        ("has_export_restrictions", "Export Restrictions")
+                    ] %}
+                    <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="{{ field }}" {% if config[field] %}checked{% endif %}
+                            class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                        <span class="text-gray-700">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if doc_type in ["refund", "all"] %}
+            <!-- Refund Policy Specific -->
+            <div class="section-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-rotate-left mr-3 text-red-600"></i>
+                    Refund Policy Settings
+                </h2>
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Business Type</label>
+                        <select name="refund_business_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="products" {% if config.refund_business_type == "products" %}selected{% endif %}>Physical Products</option>
+                            <option value="services" {% if config.refund_business_type == "services" %}selected{% endif %}>Services</option>
+                            <option value="digital" {% if config.refund_business_type == "digital" %}selected{% endif %}>Digital Products</option>
+                            <option value="subscription" {% if config.refund_business_type == "subscription" %}selected{% endif %}>Subscriptions</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Refund Period</label>
+                        <input type="text" name="refund_period_days" value="{{ config.refund_period_days }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g., 14 days">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Return Period (Physical Products)</label>
+                        <input type="text" name="return_period" value="{{ config.return_period }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g., 30 days">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Processing Time</label>
+                        <input type="text" name="refund_processing_time" value="{{ config.refund_processing_time }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g., 5-10 business days">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Restocking Fee</label>
+                        <input type="text" name="restocking_fee" value="{{ config.restocking_fee }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g., 15%">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Return Shipping</label>
+                        <select name="return_shipping" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="customer" {% if config.return_shipping == "customer" %}selected{% endif %}>Customer Pays</option>
+                            <option value="company" {% if config.return_shipping == "company" %}selected{% endif %}>Company Pays</option>
+                            <option value="prepaid" {% if config.return_shipping == "prepaid" %}selected{% endif %}>Prepaid Label Provided</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-3 gap-4">
+                    {% for field, label in [
+                        ("has_satisfaction_guarantee", "Satisfaction Guarantee"),
+                        ("requires_receipt", "Requires Receipt"),
+                        ("requires_original_packaging", "Requires Original Packaging"),
+                        ("offers_exchanges", "Offers Exchanges"),
+                        ("offers_prorated_refunds", "Prorated Refunds (Subscriptions)"),
+                        ("sale_items_refundable", "Sale Items Refundable")
+                    ] %}
+                    <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="{{ field }}" {% if config[field] %}checked{% endif %}
+                            class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                        <span class="text-gray-700">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Output Format & Generate -->
+            <div class="section-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-download mr-3 text-blue-600"></i>
+                    Generate Document
+                </h2>
+                <div class="grid md:grid-cols-2 gap-6 items-end">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Output Format</label>
+                        <select name="output_format" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="markdown">Markdown (.md)</option>
+                            <option value="html">HTML (.html)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button type="submit" id="generateBtn"
+                            class="w-full gradient-bg text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-all flex items-center justify-center">
+                            <i class="fas fa-magic mr-2"></i>
+                            Generate Document{% if doc_type == "all" %}s{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Results Section (hidden initially) -->
+        <div id="resultsSection" class="hidden mt-8">
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-check-circle mr-3 text-green-600"></i>
+                    Generated Documents
+                </h2>
+                <div id="downloadLinks" class="space-y-4 mb-6"></div>
+
+                <div class="border-t pt-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Preview</h3>
+                    <div class="flex space-x-2 mb-4" id="previewTabs"></div>
+                    <div id="previewContent" class="preview-content bg-gray-50 rounded-lg p-6 prose max-w-none"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 text-center">
+            <div class="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p class="text-gray-700 font-medium">Generating your document...</p>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('generatorForm');
+        const resultsSection = document.getElementById('resultsSection');
+        const downloadLinks = document.getElementById('downloadLinks');
+        const previewTabs = document.getElementById('previewTabs');
+        const previewContent = document.getElementById('previewContent');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const docType = '{{ doc_type }}';
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loadingOverlay.classList.remove('hidden');
+
+            const formData = new FormData(form);
+
+            try {
+                // First update config
+                await fetch('/api/config/update', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // Then generate document
+                const response = await fetch(`/api/generate/${docType}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    displayResults(result.files);
+                } else {
+                    alert('Error generating document: ' + (result.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                loadingOverlay.classList.add('hidden');
+            }
+        });
+
+        function displayResults(files) {
+            resultsSection.classList.remove('hidden');
+            downloadLinks.innerHTML = '';
+            previewTabs.innerHTML = '';
+
+            files.forEach((file, index) => {
+                // Add download link
+                const linkDiv = document.createElement('div');
+                linkDiv.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-lg';
+                linkDiv.innerHTML = `
+                    <div>
+                        <span class="font-medium text-gray-800">${file.type}</span>
+                        <span class="text-gray-500 text-sm ml-2">${file.filename}</span>
+                    </div>
+                    <a href="/api/download/${file.filename}"
+                       class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-download mr-2"></i>Download
+                    </a>
+                `;
+                downloadLinks.appendChild(linkDiv);
+
+                // Add preview tab
+                const tab = document.createElement('button');
+                tab.className = `px-4 py-2 rounded-lg ${index === 0 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`;
+                tab.textContent = file.type;
+                tab.onclick = () => showPreview(files, index);
+                previewTabs.appendChild(tab);
+            });
+
+            // Show first preview
+            if (files.length > 0) {
+                showPreview(files, 0);
+            }
+
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showPreview(files, index) {
+            // Update tab styles
+            Array.from(previewTabs.children).forEach((tab, i) => {
+                if (i === index) {
+                    tab.className = 'px-4 py-2 rounded-lg bg-blue-600 text-white';
+                } else {
+                    tab.className = 'px-4 py-2 rounded-lg bg-gray-100 text-gray-700';
+                }
+            });
+
+            // Render content
+            const content = files[index].content;
+            if (files[index].filename.endsWith('.html')) {
+                previewContent.innerHTML = content;
+            } else {
+                previewContent.innerHTML = marked.parse(content);
+            }
+        }
+    </script>
+</body>
+</html>
