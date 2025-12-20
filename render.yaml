@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: legal-doc-generator-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: CORS_ORIGINS
+        value: https://privacy-policy-gen-3d25d.web.app,https://privacy-policy-gen-3d25d.firebaseapp.com

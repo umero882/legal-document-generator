@@ -1,7 +1,8 @@
 import axios, { AxiosError } from 'axios';
 import type { DocumentConfig, Session, GenerateResponse, PreviewResponse, DocumentType, OutputFormat } from '../types';
 
-const API_BASE_URL = '/api/v1';
+// Use environment variable for API URL, fallback to relative path for local dev
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
 // Create axios instance
 const api = axios.create({
